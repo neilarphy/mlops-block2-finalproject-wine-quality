@@ -1,0 +1,5 @@
+[core]
+    remote = mlopsremote
+['remote "mlopsremote"']
+    url = s3://bannikov/wine_quality
+    endpointurl =  http://89.223.69.137:9000

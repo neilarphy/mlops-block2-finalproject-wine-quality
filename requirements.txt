@@ -1,0 +1,10 @@
+fastapi==0.115.12
+uvicorn==0.34.3
+scikit-learn
+pandas==2.2.3
+numpy==2.2.6
+dvc-s3
+python-dotenv==1.1.0
+requests
+pytest
+httpx
