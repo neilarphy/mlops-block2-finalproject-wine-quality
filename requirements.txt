@@ -8,3 +8,10 @@ python-dotenv==1.1.0
 requests
 pytest
 httpx
+mlflow
+matplotlib
+seaborn
+jupyter
+joblib
+mlflow
+pyyaml
