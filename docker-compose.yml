@@ -17,8 +17,10 @@ x-airflow-common:
     - ./plugins:/opt/airflow/plugins
     - .:/app
     - ./.env:/app/.env
-    - ./dvc/config.local:/opt/airflow/.dvc/config.local
-    - ./dvc/config:/opt/airflow/.dvc/config
+    # - ./dvc/config.local:/opt/airflow/.dvc/config.local
+    # - ./dvc/config:/opt/airflow/.dvc/config
+    - ./config:/opt/airflow/config
+    - ./.dvc:/opt/airflow/.dvc
   user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
   depends_on:
     postgres:

@@ -7,16 +7,32 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, root_mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error
+import subprocess
+from pathlib import Path
+import logging as lg
 
 def dvc_pull_data():
-    os.system("dvc pull data/winequality-red.csv.dvc")
+    subprocess.run(
+        ["dvc", "pull", "data/winequality-red.csv.dvc"],
+        cwd="/app", 
+        check=True
+    )
 
 def train_and_save_model():
-    with open("config/rf_config.yaml", "r") as f:
+    lg.info("📦 Загрузка параметров из config/rf_config.yaml...")
+    base_path = Path("/app")
+    config_path = base_path / "config" / "rf_config.yaml"
+    data_path = base_path / "data" / "winequality-red.csv"
+    model_dir = base_path / "model"
+    model_file = model_dir / "model.pkl"
+    metrics_file = model_dir / "metrics.yaml"
+
+    with open(config_path, "r") as f:
         params = yaml.safe_load(f)
 
-    df = pd.read_csv("data/winequality-red.csv")
+    lg.info("📥 Чтение данных из data/winequality-red.csv...")
+    df = pd.read_csv(data_path)
 
     X = df.drop("quality", axis=1)
     y = df["quality"]
@@ -24,22 +40,36 @@ def train_and_save_model():
         X, y, test_size=0.2, random_state=42
     )
 
+    lg.info("🧠 Обучение модели RandomForestRegressor...")
     model = RandomForestRegressor(**params)
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
     r2 = r2_score(y_test, y_pred)
-    rmse = root_mean_squared_error(y_test, y_pred)
+    rmse = mean_squared_error(y_test, y_pred, squared=True)
 
-    os.makedirs("model", exist_ok=True)
-    joblib.dump(model, "model/model.pkl")
-
-    with open("model/metrics.yaml", "w") as f:
+    joblib.dump(model, model_file)
+    with open(metrics_file, "w") as f:
         yaml.dump({"r2_score": float(r2), "rmse": float(rmse)}, f)
 
+    lg.info(f"✅ Модель сохранена в: {model_file}")
+    lg.info(f"📊 Метрики: R2 = {r2:.4f}, RMSE = {rmse:.4f}")
+
+
 def dvc_add_model():
-    os.system("dvc add model/model.pkl")
-    os.system("dvc add model/metrics.yaml")
+    base_path = Path("/app")
+    model_file = base_path / "model" / "model.pkl"
+    metrics_file = base_path / "model" / "metrics.yaml"
+
+    lg.info("🗃️ Выполняется DVC add для артефактов модели...")
+
+    try:
+        subprocess.run(["dvc", "add", str(model_file)], cwd=base_path, check=True, capture_output=True, text=True)
+        subprocess.run(["dvc", "add", str(metrics_file)], cwd=base_path, check=True, capture_output=True, text=True)
+        lg.info("✅ DVC add выполнен успешно.")
+    except subprocess.CalledProcessError as e:
+        lg.error("❌ DVC add завершился с ошибкой:")
+     
 
 default_args = {
     "start_date": datetime(2024, 1, 1),
