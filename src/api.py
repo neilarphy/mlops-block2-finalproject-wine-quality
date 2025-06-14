@@ -1,17 +1,15 @@
 import sys
 from pathlib import Path
-
-sys.path.append(str(Path(__file__).resolve().parent))
-
 import uvicorn
 import logging
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from sklearn import __version__ as sklearn_version
-
+sys.path.append(str(Path(__file__).resolve().parent))
 from model_utils import load_model
 from predict import WineFeatures, make_prediction
+
 
 logging.basicConfig(
     level=logging.INFO,
