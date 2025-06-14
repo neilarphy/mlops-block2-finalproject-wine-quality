@@ -1,0 +1,5 @@
+outs:
+- md5: 38c44bc6dd58078d16c93af13a4f3a89
+  size: 54
+  hash: md5
+  path: metrics.yaml
