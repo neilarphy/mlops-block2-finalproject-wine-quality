@@ -69,6 +69,18 @@ def dvc_add_model():
         lg.info("✅ DVC add выполнен успешно.")
     except subprocess.CalledProcessError as e:
         lg.error("❌ DVC add завершился с ошибкой:")
+
+def dvc_push_artifacts():
+    base_path = Path("/app")
+
+    lg.info("🚀 Отправка модели и метрик в удалённое хранилище через DVC push...")
+    try:
+        subprocess.run(["dvc", "push"], cwd=base_path, check=True, capture_output=True, text=True)
+        lg.info("✅ DVC push завершён успешно.")
+    except subprocess.CalledProcessError as e:
+        lg.error("❌ Ошибка при выполнении DVC push:")
+        lg.error(e.stderr)
+
      
 
 default_args = {
@@ -97,4 +109,10 @@ with DAG("train_model_daily",
         python_callable=dvc_add_model,
     )
 
-    dvc_pull >> train_model >> dvc_track
+    dvc_push = PythonOperator(
+    task_id="dvc_push_artifacts",
+    python_callable=dvc_push_artifacts,
+    )
+
+
+    dvc_pull >> train_model >> dvc_track >> dvc_push
