@@ -162,7 +162,7 @@ airflow airflow
 ## Запуск FastAPI-приложения
 
 ```bash
-uvicorn src.api:app --reload --host 127.0.0.1 --port 8000
+python ./src/api.py
 ```
 
 **Доступные эндпоинты:**
