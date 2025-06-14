@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
 import pandas as pd
 
 class WineFeatures(BaseModel):

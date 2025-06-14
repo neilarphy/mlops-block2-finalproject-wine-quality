@@ -1,7 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-import os
 import yaml
 import joblib
 import pandas as pd
@@ -12,12 +11,14 @@ import subprocess
 from pathlib import Path
 import logging as lg
 
+
 def dvc_pull_data():
     subprocess.run(
         ["dvc", "pull", "data/winequality-red.csv.dvc"],
-        cwd="/app", 
+        cwd="/app",
         check=True
     )
+
 
 def train_and_save_model():
     lg.info("📦 Загрузка параметров из config/rf_config.yaml...")
@@ -64,35 +65,54 @@ def dvc_add_model():
     lg.info("🗃️ Выполняется DVC add для артефактов модели...")
 
     try:
-        subprocess.run(["dvc", "add", str(model_file)], cwd=base_path, check=True, capture_output=True, text=True)
-        subprocess.run(["dvc", "add", str(metrics_file)], cwd=base_path, check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["dvc", "add", str(model_file)], 
+            cwd=base_path, 
+            check=True, 
+            capture_output=True, 
+            text=True)
+        
+        subprocess.run(
+            ["dvc", "add", str(metrics_file)], 
+            cwd=base_path, 
+            check=True, 
+            capture_output=True, 
+            text=True)
+        
         lg.info("✅ DVC add выполнен успешно.")
     except subprocess.CalledProcessError as e:
         lg.error("❌ DVC add завершился с ошибкой:")
+        lg.error(e.stderr)
+
 
 def dvc_push_artifacts():
     base_path = Path("/app")
-
     lg.info("🚀 Отправка модели и метрик в удалённое хранилище через DVC push...")
     try:
-        subprocess.run(["dvc", "push"], cwd=base_path, check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["dvc", "push"], 
+            cwd=base_path, 
+            check=True, 
+            capture_output=True, 
+            text=True)
         lg.info("✅ DVC push завершён успешно.")
     except subprocess.CalledProcessError as e:
         lg.error("❌ Ошибка при выполнении DVC push:")
         lg.error(e.stderr)
 
-     
 
 default_args = {
     "start_date": datetime(2024, 1, 1),
     "catchup": False
 }
 
+
 with DAG("train_model_daily",
-         schedule_interval="@daily",
-         default_args=default_args,
-         tags=["mlops", "wine"],
-         description="Train model daily and save to DVC") as dag:
+        schedule_interval="@daily",
+        default_args=default_args,
+        tags=["mlops", "wine"],
+        description="Train model daily and save to DVC"
+    ) as dag:
 
     dvc_pull = PythonOperator(
         task_id="dvc_pull_data",
@@ -113,6 +133,5 @@ with DAG("train_model_daily",
     task_id="dvc_push_artifacts",
     python_callable=dvc_push_artifacts,
     )
-
 
     dvc_pull >> train_model >> dvc_track >> dvc_push
