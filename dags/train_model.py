@@ -107,12 +107,13 @@ default_args = {
 }
 
 
-with DAG("train_model_daily",
-            schedule_interval="@daily",
-            default_args=default_args,
-            tags=["mlops", "wine"],
-            description="Train model daily and save to DVC"
-        ) as dag:
+with DAG(
+        "train_model_daily",
+        schedule_interval="@daily",
+        default_args=default_args,
+        tags=["mlops", "wine"],
+        description="Train model daily and save to DVC"
+) as dag:
 
     dvc_pull = PythonOperator(
         task_id="dvc_pull_data",

@@ -1,13 +1,15 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent))
+
 import uvicorn
 import logging
-import sys
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
-from pathlib import Path
 from sklearn import __version__ as sklearn_version
 
-sys.path.append(str(Path(__file__).resolve().parent))
 from model_utils import load_model
 from predict import WineFeatures, make_prediction
 
@@ -75,7 +77,7 @@ async def healthcheck():
         return {"status": "ok"}
     except Exception as e:
         return {
-            "status": "error", 
+            "status": "error",
             "reason": f"Предсказание не удалось с ошибкой {e}"}
 
 

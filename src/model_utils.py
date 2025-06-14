@@ -7,7 +7,7 @@ MODEL_PATH = Path('model/model.pkl')
 
 def pull_model():
     result = subprocess.run(
-        ["dvc", "pull", str(MODEL_PATH) + ".dvc"], 
+        ["dvc", "pull", str(MODEL_PATH) + ".dvc"],
         check=True)
     return result.returncode == 0
 
