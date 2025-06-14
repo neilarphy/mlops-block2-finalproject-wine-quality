@@ -66,19 +66,19 @@ def dvc_add_model():
 
     try:
         subprocess.run(
-            ["dvc", "add", str(model_file)], 
-            cwd=base_path, 
-            check=True, 
-            capture_output=True, 
+            ["dvc", "add", str(model_file)],
+            cwd=base_path,
+            check=True,
+            capture_output=True,
             text=True)
-        
+
         subprocess.run(
-            ["dvc", "add", str(metrics_file)], 
-            cwd=base_path, 
-            check=True, 
-            capture_output=True, 
+            ["dvc", "add", str(metrics_file)],
+            cwd=base_path,
+            check=True,
+            capture_output=True,
             text=True)
-        
+
         lg.info("✅ DVC add выполнен успешно.")
     except subprocess.CalledProcessError as e:
         lg.error("❌ DVC add завершился с ошибкой:")
@@ -87,13 +87,13 @@ def dvc_add_model():
 
 def dvc_push_artifacts():
     base_path = Path("/app")
-    lg.info("🚀 Отправка модели и метрик в удалённое хранилище через DVC push...")
+    lg.info("🚀 Отправка модели и метрик через DVC push...")
     try:
         subprocess.run(
-            ["dvc", "push"], 
-            cwd=base_path, 
-            check=True, 
-            capture_output=True, 
+            ["dvc", "push"],
+            cwd=base_path,
+            check=True,
+            capture_output=True,
             text=True)
         lg.info("✅ DVC push завершён успешно.")
     except subprocess.CalledProcessError as e:
@@ -108,11 +108,11 @@ default_args = {
 
 
 with DAG("train_model_daily",
-        schedule_interval="@daily",
-        default_args=default_args,
-        tags=["mlops", "wine"],
-        description="Train model daily and save to DVC"
-    ) as dag:
+            schedule_interval="@daily",
+            default_args=default_args,
+            tags=["mlops", "wine"],
+            description="Train model daily and save to DVC"
+        ) as dag:
 
     dvc_pull = PythonOperator(
         task_id="dvc_pull_data",
@@ -130,8 +130,8 @@ with DAG("train_model_daily",
     )
 
     dvc_push = PythonOperator(
-    task_id="dvc_push_artifacts",
-    python_callable=dvc_push_artifacts,
+        task_id="dvc_push_artifacts",
+        python_callable=dvc_push_artifacts,
     )
 
     dvc_pull >> train_model >> dvc_track >> dvc_push

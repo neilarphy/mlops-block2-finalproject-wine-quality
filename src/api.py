@@ -1,9 +1,9 @@
 import uvicorn
+import logging
+import sys
+import pandas as pd
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
-import pandas as pd
-import logging 
-import sys
 from pathlib import Path
 from sklearn import __version__ as sklearn_version
 
@@ -19,6 +19,7 @@ lg = logging.getLogger(__name__)
 
 model = None
 MODEL_PATH = Path("model/model.pkl")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,6 +52,7 @@ async def predict(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/healthcheck")
 async def healthcheck():
     if model is None:
@@ -72,8 +74,11 @@ async def healthcheck():
         _ = model.predict(dummy)
         return {"status": "ok"}
     except Exception as e:
-        return {"status": "error", "reason": f"Предсказание не удалось с ошибкой {e}"}
-    
+        return {
+            "status": "error", 
+            "reason": f"Предсказание не удалось с ошибкой {e}"}
+
+
 @app.get("/model-info")
 async def model_info():
     if model is None:
